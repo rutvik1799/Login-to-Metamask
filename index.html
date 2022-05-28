@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+        <head>
+          <title>Web3 Metamask Login</title>
+          <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+          <link href="style.css" rel="stylesheet2">
+          <script src="./metamask.js"></script>
+          <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.36/dist/web3.min.js"></script>
+          <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" crossorigin="anonymous"></script>
+
+          
+        </head>
+        
+        <body class="flex w-screen h-screen justify-center items-center">
+          <div class="flex-col space-y-2 justify-center items-center">
+            <h1 style="text-align:center"> Welcome!! Please login</h1>
+            <button id="loginButton" class="mx-auto rounded-md p-2 bg-purple-500 text-white">
+              Login with MetaMask
+            </button>
+            <p id='userWallet' class='text-lg text-gray-600 my-2'></p>
+
+            <input type="text" id="amount" style="border: 1px; border-style: solid" >
+            <p id="balance"></p>
+            <button id="deposit" class="mx-auto rounded-md p-2 bg-purple-500 text-white">Deposit</button>
+            <button id="withdraw" class="mx-auto rounded-md p-2 bg-purple-500 text-white">withdraw</button>
+
+          </div>
+
+        
+          <script>
+
+              var contract;
+
+              $(document).ready(function()
+              {
+                  web3 = new web3(web3.currentProvider);
+
+                  var address = "0x5B253330B9bD6278EfBC7d439ddf30fd1e8C2f50";
+                  var abi = [
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getBalance",
+		"outputs": [
+			{
+				"name": "",
+				"type": "int256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "amt",
+				"type": "int256"
+			}
+		],
+		"name": "withdraw",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "amt",
+				"type": "int256"
+			}
+		],
+		"name": "deposit",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	}
+];
+
+
+                  contract = new web3.eth.Contract(abi,address);
+
+                  contract.methods.getBalance().call().then(function(balance)
+                  {
+                      $('#balance').html(balance);
+                  })
+              })
+
+
+
+            window.userWalletAddress = null
+            const loginButton = document.getElementById('loginButton')
+            const userWallet = document.getElementById('userWallet')
+        
+            function toggleButton() {
+              if (!window.ethereum) {
+                loginButton.innerText = 'MetaMask is not installed'
+                loginButton.classList.remove('bg-purple-500', 'text-white')
+                loginButton.classList.add('bg-gray-500', 'text-gray-100', 'cursor-not-allowed')
+                return false
+              }
+        
+              loginButton.addEventListener('click', loginWithMetaMask)
+            }
+        
+            async function loginWithMetaMask() {
+              const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+                .catch((e) => {
+                  console.error(e.message)
+                  return
+                })
+              if (!accounts) { return }
+        
+              window.userWalletAddress = accounts[0]
+              userWallet.innerText = window.userWalletAddress
+              loginButton.innerText = 'Sign out of MetaMask'
+        
+              loginButton.removeEventListener('click', loginWithMetaMask)
+              setTimeout(() => {
+                loginButton.addEventListener('click', signOutOfMetaMask)
+              }, 200)
+            }
+        
+            function signOutOfMetaMask() {
+              window.userWalletAddress = null
+              userWallet.innerText = ''
+              loginButton.innerText = 'Sign in with MetaMask'
+        
+              loginButton.removeEventListener('click', signOutOfMetaMask)
+              setTimeout(() => {
+                loginButton.addEventListener('click', loginWithMetaMask)
+              }, 200)
+            }
+        
+            window.addEventListener('DOMContentLoaded', () => {
+              toggleButton()
+            });
+          </script>
+        </body>
+        
+        </html>
